@@ -9,4 +9,4 @@ USER 104
 
 EXPOSE 9980
 
-CMD ["/bin/sh" "-c" "bash start-collabora-online.sh"]
+CMD bash start-collabora-online.sh
