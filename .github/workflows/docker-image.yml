@@ -1,0 +1,27 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: "0 4 * * *"
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_HUB_DEPLOY_KEY }}
+    - name: Build the Docker image
+      run: |
+        docker build . --tag mietzen/synology-collabora:$(date +%s)
+        docker tag mietzen/synology-collabora:$(date +%s) mietzen/synology-collabora:latest
+        docker login -u mietzen -p ${{ secrets.DOCKERHUB_PASSWORD }}
+        docker push -a mietzen/synology-collabora
+        docker logout
