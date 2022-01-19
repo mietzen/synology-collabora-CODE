@@ -15,13 +15,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
+  
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
       with:
-        DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_HUB_DEPLOY_KEY }}
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_DEPLOY_KEY }}
+  
     - name: Build the Docker image
       run: |
         docker build . --tag mietzen/synology-collabora:$(date -I)
         docker tag mietzen/synology-collabora:$(date -I) mietzen/synology-collabora:latest
-        echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u mietzen --password-stdin
         docker push -a mietzen/synology-collabora
-        docker logout
