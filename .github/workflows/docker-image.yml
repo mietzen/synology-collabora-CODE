@@ -20,8 +20,8 @@ jobs:
         DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_HUB_DEPLOY_KEY }}
     - name: Build the Docker image
       run: |
-        docker build . --tag mietzen/synology-collabora:$(date +%s)
-        docker tag mietzen/synology-collabora:$(date +%s) mietzen/synology-collabora:latest
+        docker build . --tag mietzen/synology-collabora:$(date -I)
+        docker tag mietzen/synology-collabora:$(date -I) mietzen/synology-collabora:latest
         docker login -u mietzen -p ${{ secrets.DOCKERHUB_PASSWORD }}
         docker push -a mietzen/synology-collabora
         docker logout
