@@ -22,6 +22,6 @@ jobs:
       run: |
         docker build . --tag mietzen/synology-collabora:$(date -I)
         docker tag mietzen/synology-collabora:$(date -I) mietzen/synology-collabora:latest
-        docker login -u mietzen -p ${{ secrets.DOCKERHUB_PASSWORD }}
+        echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u mietzen --password-stdin
         docker push -a mietzen/synology-collabora
         docker logout
