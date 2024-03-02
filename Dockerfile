@@ -1,4 +1,4 @@
-FROM collabora/code as code 
+FROM collabora/code:23.05.9.2.1 as code 
 
 FROM perl:stable-slim AS builder
 COPY --from=code /etc/coolwsd/coolwsd.xml /tmp/coolwsd.xml
