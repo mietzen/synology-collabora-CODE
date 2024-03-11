@@ -47,14 +47,15 @@ jobs:
         BUILD_NR: ${{ github.run_number }}
         PLATFORM: ${{ matrix.platforms }}
       run: |
+        IMAGE_NAME=$(echo "${GITHUB_REPOSITORY@L}" | cut -d'/' -f2)
         ARCH=$(echo "${PLATFORM}" | awk -F  "/" '{print $2$3}')
         echo ""
         echo "============================================================="
-        echo "Building: ${DOCKER_USER}/${GITHUB_REPOSITORY@L}:${VERSION}-${ARCH}-${BUILD_NR}"
+        echo "Building: ${DOCKER_USER}/${IMAGE_NAME}:${VERSION}-${ARCH}-${BUILD_NR}"
         echo "============================================================="
         echo ""
         docker buildx build \
-          --tag "${DOCKER_USER}/${GITHUB_REPOSITORY@L}:${VERSION}-${ARCH}-${BUILD_NR}" \
+          --tag "${DOCKER_USER}/${IMAGE_NAME}:${VERSION}-${ARCH}-${BUILD_NR}" \
           --platform ${PLATFORM} \
           --load \
           -f Dockerfile .
@@ -73,15 +74,16 @@ jobs:
         BUILD_NR: ${{ github.run_number }}
         PLATFORM: ${{ matrix.platforms }}
       run: |
+        IMAGE_NAME=$(echo "${GITHUB_REPOSITORY@L}" | cut -d'/' -f2)
         ARCH=$(echo "${PLATFORM}" | awk -F  "/" '{print $2$3}')
         echo ""
         echo "============================================================="
-        echo "Pushing: ${DOCKER_USER}/${GITHUB_REPOSITORY@L}:${VERSION}-${ARCH}-${BUILD_NR}"
+        echo "Pushing: ${DOCKER_USER}/${IMAGE_NAME}:${VERSION}-${ARCH}-${BUILD_NR}"
         echo "============================================================="
         echo ""
-        docker tag "${DOCKER_USER}/${GITHUB_REPOSITORY@L}:${VERSION}-${ARCH}-${BUILD_NR}" "${DOCKER_USER}/${GITHUB_REPOSITORY@L}:${VERSION}-${ARCH}"
-        docker push "${DOCKER_USER}/${GITHUB_REPOSITORY@L}:${VERSION}-${ARCH}-${BUILD_NR}"
-        docker push "${DOCKER_USER}/${GITHUB_REPOSITORY@L}:${VERSION}-${ARCH}"
+        docker tag "${DOCKER_USER}/${IMAGE_NAME}:${VERSION}-${ARCH}-${BUILD_NR}" "${DOCKER_USER}/${IMAGE_NAME}:${VERSION}-${ARCH}"
+        docker push "${DOCKER_USER}/${IMAGE_NAME}:${VERSION}-${ARCH}-${BUILD_NR}"
+        docker push "${DOCKER_USER}/${IMAGE_NAME}:${VERSION}-${ARCH}"
 
   Shared-Manifest:
     if: github.event_name == 'release'
@@ -106,26 +108,27 @@ jobs:
         DOCKER_USER: ${{ vars.DOCKER_HUB_USERNAME || github.repository_owner }}
         BUILD_NR: ${{ github.run_number }}
       run: |
+        IMAGE_NAME=$(echo "${GITHUB_REPOSITORY@L}" | cut -d'/' -f2)
         echo ""
         echo "============================================================="
-        echo "Pushing shared manifest: ${DOCKER_USER}/${GITHUB_REPOSITORY@L}:${VERSION}"
+        echo "Pushing shared manifest: ${DOCKER_USER}/${IMAGE_NAME}:${VERSION}"
         echo "============================================================="
         echo ""
         echo "#!/bin/bash" > push-shared-tags.sh
-        echo -n "docker manifest create ${DOCKER_USER}/${GITHUB_REPOSITORY@L}:${VERSION}" >> push-shared-tags.sh
+        echo -n "docker manifest create ${DOCKER_USER}/${IMAGE_NAME}:${VERSION}" >> push-shared-tags.sh
         while read -r PLATFORM; do
           ARCH=$(echo "${PLATFORM}" | awk -F  "/" '{print $2$3}')
-          echo -n " ${DOCKER_USER}/${GITHUB_REPOSITORY@L}:${VERSION}-${ARCH}-${BUILD_NR}" >> push-shared-tags.sh
+          echo -n " ${DOCKER_USER}/${IMAGE_NAME}:${VERSION}-${ARCH}-${BUILD_NR}" >> push-shared-tags.sh
         done <<< "$(cat .github/platforms.json | jq -r '.platforms | join("\n")')"
         echo "" >> push-shared-tags.sh
-        echo -n "docker manifest create ${DOCKER_USER}/${GITHUB_REPOSITORY@L}:latest" >> push-shared-tags.sh
+        echo -n "docker manifest create ${DOCKER_USER}/${IMAGE_NAME}:latest" >> push-shared-tags.sh
         while read -r PLATFORM; do
           ARCH=$(echo "${PLATFORM}" | awk -F  "/" '{print $2$3}')
-          echo -n " ${DOCKER_USER}/${GITHUB_REPOSITORY@L}:${VERSION}-${ARCH}-${BUILD_NR}" >> push-shared-tags.sh
+          echo -n " ${DOCKER_USER}/${IMAGE_NAME}:${VERSION}-${ARCH}-${BUILD_NR}" >> push-shared-tags.sh
         done <<< "$(cat .github/platforms.json | jq -r '.platforms | join("\n")')"
         echo "" >> push-shared-tags.sh
-        echo "docker manifest push ${DOCKER_USER}/${GITHUB_REPOSITORY@L}:${VERSION}" >> push-shared-tags.sh
-        echo "docker manifest push ${DOCKER_USER}/${GITHUB_REPOSITORY@L}:latest" >> push-shared-tags.sh
+        echo "docker manifest push ${DOCKER_USER}/${IMAGE_NAME}:${VERSION}" >> push-shared-tags.sh
+        echo "docker manifest push ${DOCKER_USER}/${IMAGE_NAME}:latest" >> push-shared-tags.sh
         cat push-shared-tags.sh
         chmod +x ./push-shared-tags.sh
         ./push-shared-tags.sh
